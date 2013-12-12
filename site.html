@@ -1,0 +1,627 @@
+<html>
+<head>
+<meta charset='utf-8' >
+<title>Site</title>
+<style>
+table.t1 {
+	border-top: 1px #990000 dotted;
+	border-bottom: 1px #990000 dotted;
+}
+th.t1 {
+	border-left: 1px #990000 dotted;
+	border-right: 1px #990000 dotted;
+}
+td.t1 {
+	border-top: 1px #009900 dotted;
+	border-left: 1px #009900 dotted;
+	border-right: 1px #009900 dotted;
+}
+table.t2 {
+	border-top: 1px #6311C6 dotted;
+	border-bottom: 1px #6311C6 dotted;
+}
+th.t2 {
+	border-left: 1px #6311C6 dotted;
+	border-right: 1px #6311C6 dotted;
+}
+td.t2 {
+	border-top: 1px #01ACBA dotted;
+	border-left: 1px #01ACBA dotted;
+	border-right: 1px #01ACBA dotted;
+}
+</style>
+
+</head>
+<!-- js: code run 848 beta-gun -->
+<body>
+
+<table width="300" class="t1" >
+	<tr>
+		<th class="t1">1</th>
+		<th class="t1">2</th>
+		<th class="t1">3</th>
+	</tr>
+	<tr>
+		<td class="t1">Vasya</td>
+		<td class="t1">28.34</td>
+		<td class="t1">-15.48</td>
+	</tr>
+	<tr>
+		<td class="t1">Petya</td>
+		<td class="t1">140.02</td>
+		<td class="t1">29</td>
+	</tr>
+	<tr>
+		<td class="t1">Masha</td>
+		<td class="t1">-2.09</td>
+		<td class="t1">-37.03</td>
+	</tr>
+</table>
+    
+<div id="allButtons">
+    <button id="b1" type="button"> появится копия исходной таблицы, но с порядком полей: 1, 3, 2.  Применить для новой таблицы стили t2</button>
+    <br />
+    <button id="b2"  type="button">появится копия исходной таблицы, но с дополнительным полем  4, в котором будет сумма полей 2 и 3. Применить для новой таблицы стили t2</button>
+    <br />
+    <button id="b3"  type="button">  сохранится в cookie ключ bbb со значением, равным 43</button>
+    <br />
+    <button id="b4"  type="button">  сформируется XMLHttp-запрос на сайт «http://domain.com»,</button>
+    <br />
+    <input type="button" style="display: block"  id="b5" value="появится iframe, внутри которого будет загружен site.html(без каких-либо параметров) с исходной таблицей,  у которой будут невидимыми строки с отрицательными числами в поле 3." >
+    <br />
+    <input type="button" style="display: block"  id="b6" value="появится iframe, внутри которого будет загружен site.html(без каких-либо параметров) с исходной таблицей,  у которой будут невидимыми строки, у которых поле 1 равно «Petya»." >
+    <br />
+    <button id="b7"  type="button">будет найден комментарий, начинающийся</button>
+    <br /> <br /> <br />
+    <button id="b8"  type="button">Удалить из cookie значение 43</button>
+    <br /> <br /> <br /> <br /> <br /> <br />
+</div>
+
+
+<div id="task_1"></div>
+<div id="task_2"></div>
+<div id="task_3"></div>
+<div id="task_4"></div>
+<div id="task_5"></div>
+<div id="task_6"></div>
+<div id="task_7"></div>
+
+
+<script type="text/javascript">
+
+ 
+   var APP = {
+   
+        //объект для внутренних временных нужд
+        tmp : {},
+        //число - сумма 2 и 3 полей таблицы
+        tmpAmount : 0,
+        //для таска 4 для условия  
+        filterTaskFour : 5,
+        classT2 : 't2',
+        domain : '#',
+        cookieInt : 43,
+        currentURL : document.URL,
+        nameForHidden : 'Petya',
+        
+        
+        MainTable : document.getElementsByTagName('table')[0],
+        allButtons : document.getElementById('allButtons'),
+        
+        button_1 : document.getElementById('b1'),
+        button_2 : document.getElementById('b2'),
+        button_3 : document.getElementById('b3'),
+        button_4 : document.getElementById('b4'),
+        button_5 : document.getElementById('b5'),
+        button_6 : document.getElementById('b6'),
+        button_7 : document.getElementById('b7'),
+        button_8 : document.getElementById('b8'),
+        task_1 :  document.getElementById('task_1'),
+        task_2 :  document.getElementById('task_2'),
+        task_3 :  document.getElementById('task_3'),
+        task_4 :  document.getElementById('task_4'),
+        task_5 :  document.getElementById('task_5'),
+        task_6 :  document.getElementById('task_6'),
+        task_7 :  document.getElementById('task_7'),
+   
+        initialize : function () { 
+            this.setUpListeners();
+            this.decreaseEachValueFromTable();
+        },
+        setUpListeners : function () {
+            var self = this;
+            
+            this.button_1.onclick = function() { self.clickedButtonOne(); }
+            this.button_2.onclick = function() { self.clickedButtonTwo(); }
+            this.button_3.onclick = function() { self.clickedButtonThree(); }
+            this.button_4.onclick = function() { self.clickedButtonFour(); }
+            this.button_5.onclick = function() { self.clickedButtonFive(); }
+            this.button_6.onclick = function() { self.clickedButtonSix(); }
+            this.button_7.onclick = function() { self.clickedButtonSeven(); } 
+            this.button_8.onclick = function() { self.deleteCookie('bbb'); } 
+
+        },
+        decreaseEachValueFromTable : function () {
+         
+            var decreaseValue = this.getCookie('bbb');
+            
+            var table = this.MainTable;
+
+            var rows = table.rows;
+ 
+            //цикл по строкам
+            for ( var i = 0 , rowsCount = rows.length;  i < rowsCount; i++) {
+
+                //цикл по столбцам   
+                var cellsCount = rows[i].cells.length;
+  
+                for (var j = 0; j < cellsCount; j++) {
+         
+                    //преготоыим переменные для ajax
+                    var obj = {
+                        i: i,
+                        j:j,
+                        rows:rows
+                    };
+                    this.preparedataForAjaxHelper(obj);                
+                    // конец  преготоыим переменные для ajax
+                    if ( typeof decreaseValue === 'undefined') {
+                        continue;
+                    }
+                    if (i != 0 && j != 0) {
+                        //уменьшаем значение на то которое в куках
+                        rows[i].cells[j].innerHTML  = (parseInt(rows[i].cells[j].innerHTML*100) - decreaseValue*100)/100;
+                    }          
+                }  
+            }
+        },
+        clickedButtonOne : function () {      
+            // появится копия исходной таблицы, но с порядком полей: 1, 3, 2.  Применить для новой таблицы стили t2
+  
+            //удалить все из дива
+            this.task_1.innerHTML = '';
+   
+              // создать таблицу
+            var myclass = this.classT2; 
+            var newTable     = document.createElement("table");
+            var tblBody = document.createElement("tbody");
+            newTable.className = myclass;
+
+            //искомая таблица
+            var table = this.MainTable;
+           
+            var rows = table.rows;
+            //цикл по строкам
+            var rowsCount = rows.length; 
+
+            for ( var i = 0; i < rowsCount; i++) {
+       
+                //here need to create  tr         
+                var newRow = document.createElement("tr");     
+                //цикл по столбцам          
+                var cellsCount = rows[i].cells.length; 
+              
+                for (var j = 0 ;j < cellsCount; j++) {
+                    if (i == 0 ) {
+                        // если первая строка в таблице
+                        var newCell = document.createElement("th"); 
+                    } else {
+                        var newCell = document.createElement("td"); 
+                    }        
+                    //добавляем класс
+                    newCell.className = myclass;
+                    //создаем текстовый узел
+                    var newCellText = document.createTextNode(rows[i].cells[j].innerHTML);
+                
+                    //цепляем его а также цепляем весь узел к строке
+                    newCell.appendChild(newCellText);
+                    
+                    if (j == cellsCount - 1) {  //это последний элемент и мы должны его поставить предпоследним
+                         newRow.insertBefore(newCell, newRow.lastChild);                       
+                    } else {
+                          newRow.appendChild(newCell);
+                    }    
+                    
+                }  
+                tblBody.appendChild(newRow);           
+
+            }
+                //добавляем все что сгенерировали к таблице
+            newTable.appendChild(tblBody);
+            //цепляем таблицу к диву
+            this.task_1.appendChild(newTable);   
+            
+            
+
+            
+        },
+        clickedButtonTwo : function () {
+            //появится копия исходной таблицы, но с дополнительным полем  4, в котором будет сумма полей 2 и 3.
+            // Применить для новой таблицы стили t2
+            
+            //удалить все из дива
+            this.task_2.innerHTML = '';
+            
+            var myclass = this.classT2; 
+            var newTable     = document.createElement("table");
+            var tblBody = document.createElement("tbody");
+            newTable.className = myclass;
+            //искомая таблица
+            var table = this.MainTable;
+            var rows = table.rows;
+            //цикл по строкам
+            for ( var i = 0 , rowsCount = rows.length;  i < rowsCount; i++) {
+                //here need to create  tr         
+                var newRow = document.createElement("tr");   
+                //иницилизируем переменную для подсчета второй и третьей колонки
+                 var amount = 0;
+                //цикл по столбцам
+                for (var j = 0 , cellsCount = rows[i].cells.length; j <= cellsCount; j++) {
+                    if (i == 0 ) {
+                        // если первая строка в таблице
+                        var newCell = document.createElement("th"); 
+                    } else {
+                        var newCell = document.createElement("td"); 
+                    }        
+                    //добавляем класс
+                    newCell.className = myclass;
+                    //считаем сумму второго и третьего полей
+                   if (i != 0 && j != 0 &&  j < cellsCount) {
+//                       console.log(rows[i].cells[j].innerHTML);
+                       amount = (amount *100 + (rows[i].cells[j].innerHTML)*100)/100;
+                   }
+                    //создаем текстовый узел
+                    if (j != cellsCount) {
+                        var newCellText = document.createTextNode(rows[i].cells[j].innerHTML);
+                    } else {
+                        if (i == 0) {
+                            amount = 4;  //это th и мы должны вывести цифру 4
+                        }                         
+                        var newCellText = document.createTextNode(amount);
+                    }
+                    
+                    //цепляем его а также цепляем весь узел к строке
+                    newCell.appendChild(newCellText);                   
+                    newRow.appendChild(newCell);
+                                    
+                }  
+               tblBody.appendChild(newRow);  
+
+            }
+            //добавляем все что сгенерировали к таблице
+            newTable.appendChild(tblBody);
+            //цепляем таблицу к диву
+            this.task_2.appendChild(newTable);   
+        },
+        clickedButtonThree : function () {
+            //сохранится в cookie ключ bbb со значением, равным 43
+            //при последующем обновлении html  в исходной таблице и в таблицах из пунктов 1, 2, 5 и 6 
+            //все числа должны быть уменьшены на это значение и все операции должны производиться 
+            //уже с этим новым уменьшенным числом
+ 
+            this.setCookie('bbb', this.cookieInt);
+           // метод decreaseEachValueFromTable уменьшает все значения таблицы на 43
+           // таблицы 1,2 формируются из исхлдной т.е при клике на кнопки 1 и 2 данные исходной таблицы будут уменьшины и автоматическм будут уменьшины в таблицах по таску 1 и 2
+        },
+        clickedButtonFour : function () {
+            //сформируется XMLHttp-запрос на сайт «http://domain.com», 
+            //в котором параметрами будут переданы поле 1 и сумма полей 2 и 3 исходной таблицы,
+            // при условии что сумма больше 5.
+            //  Перед отправкой вывести alert с этими параметрами. 
+            //  Имя параметра формируется так: p1 – поле 1, ps – сумма полей 2 и 3.
+            //   Если под условие подходит несколько строк, то объединить это в один запрос
+            	// Создадим объект
+            var dataObject = this.getDataForAjax();
+     
+            var myString = "";
+            for(prop in dataObject) {
+                myString += prop+"=" + dataObject[prop] + "&";
+            }
+            var newMyString = myString.substring(0, myString.length - 1);
+			alert(newMyString);
+			// Запрос к серверу
+			var req = this.getXmlHttpRequest();
+
+            if ( req === null ) {
+                return false;
+            }
+            
+			req.onreadystatechange = function() {
+					if (req.readyState != 4) return;
+					var responseText = new String(req.responseText);
+                    alert(responseText);
+            }
+				
+			// Метод POST
+            if (this.domain == '#') {
+                alert('Вы можете указать куда  отправить аякс, переменная domain');
+            } else {
+                req.open("POST", this.domain, true);
+
+                // Установка заголовков
+                req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                req.setRequestHeader("Content-Length", newMyString.length);
+
+                // Отправка данных
+                req.send(newMyString);	
+            }
+	
+        },
+        clickedButtonFive : function () {
+            //появится iframe, внутри которого будет загружен site.html(без каких-либо параметров) с исходной таблицей, 
+            // у которой будут невидимыми строки с отрицательными числами в поле 3.
+            //  В загруженном ифрейме копии исходных таблиц из пунктов 1, 2 и 4 не должны содержать
+            //   невидимую строку исходной таблицы
+            
+             //  удалить все из дива
+            this.task_5.innerHTML = '';
+            
+            var currentURL = this.currentURL;
+            
+            var self = this;
+            
+            var myIframe = this.createIframeHelper('alex', '', this.task_5,  true);
+            myIframe.onload = function () {
+                if ( window.frames.alex.location == 'javascript:false' ) {
+                    //тут я перенаправляю на ту страницу которая мне нужна (те текущая страница)
+                     window.frames.alex.location.replace(currentURL);
+                } else {
+                    self.alexIframe.openCurrentPageInIframeTask5();
+                }
+            }
+            return false;
+        },
+        clickedButtonSix : function () {
+            // появится iframe, внутри которого будет загружен site.html(без каких-либо параметров)
+            //  с исходной таблицей,  у которой будут невидимыми строки,
+            //   у которых поле 1 равно «Petya».
+            //   Это значение должно задаваться отдельной переменной. 
+            //    В загруженном ифрейме копии исходных таблиц из пунктов 1, 2 и 4 не должны содержать невидимую строку
+            //     исходной таблицы
+                //  удалить все из дива
+            this.task_6.innerHTML = '';
+            
+            var currentURL = this.currentURL;
+            
+            var self = this;
+            
+            var myIframe = this.createIframeHelper('alex2', '', this.task_6,  true);
+            myIframe.onload = function () {
+                if ( window.frames.alex2.location == 'javascript:false' ) {
+                    //тут я перенаправляю на ту страницу которая мне нужна (те текущая страница)
+                     window.frames.alex2.location.replace(currentURL);
+                } else {
+                   self.alexIframe2.openCurrentPageInIframeTask6();
+                }
+            }
+            return false;
+        },
+        clickedButtonSeven : function () {
+            // будет найден комментарий, начинающийся с  <!— js: и вывести alert с текстом, идущим после двоеточия
+                var childNodes = document.documentElement.childNodes; 
+                if (childNodes.length > 2) { // here we have comment node
+                    var comment = this.searchCommentNodeHelper(childNodes);    
+                    alert('work if 1 - comment = ' + comment );
+                    return ;
+                }
+                var childNodes = document.documentElement.children;  //ie < 9
+                if (childNodes.length > 2) { // here we have comment node
+                    var comment = this.searchCommentNodeHelper(childNodes);    
+                    alert('work if 2 - comment = ' + comment );
+                    return ;
+                }
+                //comment included to head node as a lastchild
+                var childNodes = document.documentElement.children;  
+                var comment = this.searchCommentNodeHelper(childNodes[0].children);
+                if (comment !== null) {
+                    alert('work if 3 - comment = ' + comment );
+                    return;
+                }
+                alert('error - could not find comment node');
+        },
+       
+        ///////////////////////////////////////////////////////     
+        //        HELPERS                           /////////// 
+        ///////////////////////////////////////////////////////        
+       searchCommentNodeHelper : function (childNodes) {        
+                for(var i = 0; i < childNodes.length; i++) {
+                 if (childNodes[i].nodeType  !== 8 ) {
+                     continue;
+                 }
+                 //comment node
+                 var text = childNodes[i].nodeValue;
+                 var nospaceText = this.nospace(text);
+                 //должны проверить js:
+                 if ( (nospaceText.search('js:') === 0) ) {
+                     var returnStr = nospaceText.substring(3);
+                     return returnStr;
+                 }                        
+             }  
+             return null;
+       },
+        // возвращает cookie с именем name, если есть, если нет, то undefined
+        getCookie : function(name) {
+          var matches = document.cookie.match(new RegExp(
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+          ));
+          return matches ? decodeURIComponent(matches[1]) : undefined;
+        },
+        // устанавливает cookie c именем name и значением value
+        // options - объект с свойствами cookie (expires, path, domain, secure)
+        setCookie : function (name, value, options) {
+            options = options || {};
+
+            var expires = options.expires;
+
+            if (typeof expires == "number" && expires) {
+                var d = new Date();
+                d.setTime(d.getTime() + expires*1000);
+                expires = options.expires = d;
+            }
+            if (expires && expires.toUTCString) { 
+                options.expires = expires.toUTCString();
+            }
+
+            value = encodeURIComponent(value);
+
+            var updatedCookie = name + "=" + value;
+
+            for(var propName in options) {
+                updatedCookie += "; " + propName;
+                var propValue = options[propName];    
+                if (propValue !== true) { 
+                    updatedCookie += "=" + propValue;
+                }
+            }
+
+            document.cookie = updatedCookie;
+        },
+        // удаляет cookie с именем name
+        deleteCookie : function (name) {
+            this.setCookie(name, "", { expires: -1 });
+        },
+        getXmlHttpRequest : function() {
+            if (window.XMLHttpRequest) {
+                try {
+                    return new XMLHttpRequest();
+                } catch (e){
+                    alert('error 1');
+                }
+            }  else if (window.ActiveXObject) {
+                try  {
+                    return new ActiveXObject('Msxml2.XMLHTTP');
+                } catch (e){
+                   alert('error 2');
+                }
+                
+                try {
+                    return new ActiveXObject('Microsoft.XMLHTTP');
+                }catch (e){
+                    alert('error 3');
+                }
+            }
+            return null;
+        },
+        preparedataForAjaxHelper : function (obj) {
+            if( obj.i !== 0  ) {   //пропускаем самую верхнюю строку где просто идет нумерация - 1 2 3
+                if ( obj.j == 0 ) { // это имена
+                       this.setDataForAjaxBeforeDecreaseTableValue('p'+obj.i,obj.rows[obj.i].cells[obj.j].innerHTML );
+                } else {                            
+                    if ( obj.j == 1 ) {
+                        this.tmpAmount = obj.rows[obj.i].cells[obj.j].innerHTML;
+                    } else {
+                        var total = (this.tmpAmount*100 + obj.rows[obj.i].cells[obj.j].innerHTML*100)/100;
+                        if (total > this.filterTaskFour) {
+                             this.setDataForAjaxBeforeDecreaseTableValue('ps'+obj.i,total);
+                        }                       
+                    }
+                }
+            }
+        },
+        setDataForAjaxBeforeDecreaseTableValue : function (name, value) {
+            this.tmp[name] = value;
+        },
+        getDataForAjax : function () {
+            return this.tmp;
+        },
+        createIframeHelper : function(name, src, appendTo,  debug) {
+//            src = src || 'javascript:false'; // пустой src
+
+            var tmpElem = document.createElement('div');
+
+            // в старых IE нельзя присвоить name после создания iframe
+            // поэтому создаём через innerHTML
+            tmpElem.innerHTML = '<iframe width="800px" height="600px" name="'+name+'" id="'+name+'" src="'+src+'">';
+            var iframe = tmpElem.firstChild;
+
+            if ( ! debug ) {
+              iframe.style.display = 'none';
+            }
+
+            appendTo.appendChild(iframe);
+
+            return iframe;
+        },
+        nospace : function(str) {
+              var VRegExp = new RegExp(/^(\s|\u00A0)+/g); 
+              var VResult = str.replace(VRegExp, '');
+              return VResult;
+        }
+
+    };
+ 
+
+    APP.alexIframe = {
+            //появится iframe, внутри которого будет загружен site.html(без каких-либо параметров) с исходной таблицей, 
+            // у которой будут невидимыми строки с отрицательными числами в поле 3.
+            //  В загруженном ифрейме копии исходных таблиц из пунктов 1, 2 и 4 не должны содержать
+            //   невидимую строку исходной таблицы
+          openCurrentPageInIframeTask5 : function () {
+            if (typeof window.alex === 'undefined') {
+                return;
+            }  
+            var iframeAPP = window.alex.APP;
+            iframeAPP.allButtons.style.display = 'none';   
+            // добавляем таблицу из таска 1 
+            iframeAPP.clickedButtonOne();
+            //добавляем таблицу из таска 2
+            iframeAPP.clickedButtonTwo();
+            // ТАСК 4 НЕ СОДЕРЖИТ ТАБЛИЦ
+            
+            //перерисовываем  искомую таблицу и прячем отрицательные поля
+            var table = iframeAPP.MainTable;
+            var rows = table.rows;
+            //цикл по строкам
+            for ( var i = 1 , rowsCount = rows.length;  i < rowsCount; i++) {
+                var cellsLength = rows[i].cells.length;
+                //последняя колонка таблицы
+                var thirdCells = rows[i].cells[cellsLength - 1].innerHTML ;
+                if ( thirdCells < 0 ) {
+                    rows[i].style.display = 'none';   
+                }
+            }
+           
+        }
+     
+    };
+    
+    APP.alexIframe2 = {
+            // появится iframe, внутри которого будет загружен site.html(без каких-либо параметров)
+            //  с исходной таблицей,  у которой будут невидимыми строки,
+            //   у которых поле 1 равно «Petya».
+            //   Это значение должно задаваться отдельной переменной. 
+            //    В загруженном ифрейме копии исходных таблиц из пунктов 1, 2 и 4 не должны содержать невидимую строку
+            //     исходной таблицы
+        openCurrentPageInIframeTask6 : function () {
+            
+            if (typeof window.alex2 === 'undefined') {
+                 return;
+            }
+            var iframeAPP = window.alex2.APP;
+            iframeAPP.allButtons.style.display = 'none';
+            // добавляем таблицу из таска 1 
+            iframeAPP.clickedButtonOne();
+            //добавляем таблицу из таска 2
+            iframeAPP.clickedButtonTwo();
+            // ТАСК 4 НЕ СОДЕРЖИТ ТАБЛИЦ
+            
+             //перерисовываем  искомую таблицу и прячем отрицательные поля
+            var table = iframeAPP.MainTable;
+            var rows = table.rows;
+            //цикл по строкам
+            for ( var i = 1 , rowsCount = rows.length;  i < rowsCount; i++) {
+                //первоя колонка таблицы
+                var firstCell = rows[i].cells[0].innerHTML;         
+                if ( firstCell ===  iframeAPP.nameForHidden) {
+                    rows[i].style.display = 'none';   
+                }
+            }            
+        }
+    };
+
+      APP.initialize();
+   
+
+</script>
+</body>
+</html>
